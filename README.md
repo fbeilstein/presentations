@@ -8,3 +8,5 @@
 * [For June 26, 2023, Linear Regression](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_June_26_2023_lecture_2.ipynb)
 * [For June 27, 2023, SVM](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_June_27_2023_lecture_1.ipynb)
 * [For June 27, 2023, NN](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_June_27_2023_lecture_2.ipynb)
+* [For August 8, 2023, Manifold Learning](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_August_8_2023_lecture_2.ipynb)
+* [For August 10, 2023, Persistent Homology](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_August_10_2023_lecture_2.ipynb)
