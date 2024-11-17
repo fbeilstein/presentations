@@ -11,5 +11,5 @@
 * [For August 8, 2023, Cosmological Problem](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/cosmological_problem_for_August_8_2023.ipynb)
 * [For August 8, 2023, Manifold Learning](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_August_8_2023.ipynb)
 * [For August 10, 2023, Persistent Homology](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_August_10_2023.ipynb)
-* [For April 11, 2024, Cosmology & Topology](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_April_11_2024.ipynb)
-* [For October 31, 2024, NN basics](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_October_31_2024.ipynb)
+* [For April 11, 2024, Cosmology & Topology](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_April_11_2024.ipynb) [[VIDEO]](https://youtu.be/RAA6jNn8EOo?list=PLSGP3r1iKksP2sFnvFfEsg9BrS3Uj76aC)
+* [For October 31, 2024, NN basics](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_October_31_2024.ipynb) [[VIDEO]](https://www.youtube.com/watch?v=RWUvt3QCfhA)
