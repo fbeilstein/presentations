@@ -24,5 +24,5 @@
   [<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/YouTube_play_button_icon_%282013%E2%80%932017%29.svg/320px-YouTube_play_button_icon_%282013%E2%80%932017%29.svg.png" width=20/>](https://www.youtube.com/watch?v=RWUvt3QCfhA)
 * [For December 3, 2024, NN basics](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_December_3_2024.ipynb)
   [<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/YouTube_play_button_icon_%282013%E2%80%932017%29.svg/320px-YouTube_play_button_icon_%282013%E2%80%932017%29.svg.png" width=20/>](https://youtu.be/lX0mHEA2P_w?t=5074)
-* [For May 5, 2025, Cosmology & Topology](presentation_for_May_5_2025.ipynb)
+* [For May 5, 2025, Cosmology & Topology](https://colab.research.google.com/github/fbeilstein/presentations/blob/master/presentation_for_May_5_2025.ipynb)
   
