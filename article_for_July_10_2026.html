@@ -1,0 +1,676 @@
+<!-- prettier-ignore -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Про одне застосування дуальних чисел</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/acorn/8.11.3/acorn.min.js"></script>
+  <style>
+    body {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1em;
+      font-family: sans-serif;
+      line-height: 1.6;
+    }
+    .quote {
+      margin-left: 20px;
+      border-left: 2px solid gray;
+      padding-left: 10px;
+      display: none;
+    }
+    .demo {
+      border: 1px dashed black;
+      padding: 10px;
+      margin: 10px 0;
+      background: #eee;
+    }
+    .demo-layout {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .demo-controls {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .demo-plot {
+      flex: 2;
+      min-width: 400px;
+    }
+    @media (max-width: 600px) {
+      .demo-layout { flex-direction: column; }
+      .demo-plot { min-width: 100%; }
+    }
+    button {
+      cursor: pointer;
+      padding: 5px 10px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  
+  <h1>Про одне застосування дуальних чисел</h1>
+
+  <h2>Замість вступу: комплексні числа</h2>
+  
+  <p>Я думаю, всі присутні так чи інакше стикалися з комплексними числами, якщо не в школі, то у ВУЗі так точно. Як на мене, це просто дивовижно, наскільки багата система постає з простого додавання "нового числа" \(i^2 = -1\): всі поліноми тепер мають корені (<a href="https://en.wikipedia.org/wiki/Fundamental_theorem_of_algebra">основна теорема алгебри</a>), всі ці <a href="https://en.wikipedia.org/wiki/Contour_integration">інтеграли по контуру</a>, <a href="https://en.wikipedia.org/wiki/Monodromy">монодромії</a>, <a href="https://en.wikipedia.org/wiki/Conformal_map">конформні відображення</a> і т.д. Що цікаво, схоже, що комплексні числа не лише мають широке застосування в науці та техніці, а і взагалі вплетені в структуру нашої реальності: наприклад, не вийде побудувати квантову механіку без комплексних чисел.</p>
+
+
+  <button onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">Заглянути в безодню</button>
+  <div class="quote">
+    <p>У дійсній квантовій механіці втрачається природний зв'язок між генераторами симетрій та спостережуваними величинами: у комплексній теорії множення на \(i\) перетворює антисиметричний оператор (генератор) на ермітів (спостережувану), тоді як у дійсній теорії цієї можливості немає. Більше того, у 2022 році неспроможність дійсної квантової механіки довели експериментально на рівні статистики кореляцій у багаточастинкових системах: <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.128.040402">"Testing real quantum theory in an optical quantum network." Phys. Rev. Lett. 128, 040402 (2022)</a>.</p>
+  </div>
+
+
+  <p>Але сьогодні я хочу поговорити про їх менш відомих родичів. Давайте для початку піднімемось на один "філософський" рівень вище і задамось питанням, що цікавого можна витрясти з конструкцій типу \(x + y \cdot \text{[SOMETHING]}\), де \(x \in \mathbb{R}\), \(y \in \mathbb{R}\), а \(\text{[SOMETHING]}\) &mdash; це щось, що можна хоча б множити на себе. Якщо просто поставити замість \(\text{[SOMETHING]}\) якийсь \(x\) &mdash; прийдемо до <a href="https://en.wikipedia.org/wiki/Polynomial_ring">кільця поліномів</a>, що знаходить своє застосування в дуже багатьох областях, але програмістам як мінімум будуть близькі теорія кодування чи криптографія. Також ми вже бачили, наскільки плідною може бути система \(\text{[SOMETHING]}^2 = -1\). Виникає природне питання: а що, якщо \(\text{[SOMETHING]}^2 = -2\)? А якщо \(-10\) ?</p>
+
+
+  <p>Як виявляється (з <a href="https://en.wikipedia.org/wiki/Hypercomplex_number#Two-dimensional_real_algebras">теореми про класифікацію двовимірних алгебр над полем дійсних чисел</a>), якщо \(\text{[SOMETHING]}^2 \in \mathbb{R}\), то маємо справу з системою, що легко зводиться до одного з трьох випадків, які фундаментально відрізняються між собою:</p>
+  <ul>
+    <li>\(\text{[SOMETHING]}^2 = -1\) &mdash; <a href="https://en.wikipedia.org/wiki/Complex_number">комплексні числа</a>, окрім вже переліченого це основа всієї обробки сигналів та радіотехніки;</li>
+    <li>\(\text{[SOMETHING]}^2 = 0\) &mdash; <a href="https://en.wikipedia.org/wiki/Dual_number">дуальні числа</a>, якщо розширити їх до дуальних кватерніонів (вид <a href="https://en.wikipedia.org/wiki/Hypercomplex_number">гіперкомплексних чисел</a>), вони стають незамінними у 3D-графіці та розробці ігор (алгоритм <a href="https://users.cs.utah.edu/~ladislav/dq/">dual quaternion skinning</a> в Unreal, Unity чи Blender, що дозволяє згинати суглоби персонажів без візуальних артефактів), а також у кінематиці роботів (наприклад, відкритий фреймворк <a href="https://dqrobotics.github.io/">DQ Robotics</a>, який має інтеграцію з ROS);</li>
+    <li>\(\text{[SOMETHING]}^2 = +1\) &mdash; <a href="https://en.wikipedia.org/wiki/Split-complex_number">двійні (або розщеплені комплексні) числа</a>, їхня алгебра природно описує геометрію <a href="https://en.wikipedia.org/wiki/Minkowski_space">простору-часу Мінковського</a> у спеціальній теорії відносності (для \(1+1\) вимірів), де множення \(z \mapsto z\, e^{\text{[SOMETHING]}\eta}\) працює як <a href="https://en.wikipedia.org/wiki/Lorentz_transformation">перетворення Лоренца</a> елемента простору Мінковського \(z\) (буст), подібно до того як \(z \mapsto z\, e^{i\varphi}\) для звичайних комплексних чисел обертає вектор на площині на кут \(\varphi\).</li>
+  </ul>
+
+
+  <h2>(Forward-Mode) Autodiff</h2>
+
+  <p>Як бачимо, тут є багато цікавого, але я хотів би особливо виділити механізм розрахунку значень похідних, заснований на дуальних числах. Ця схема використовується у бібліотеці Ceres та всьому, що надбудовано на ній, &mdash; <a href="http://ceres-solver.org/automatic_derivatives.html#dual-numbers-jets"> структура "Jet"</a> є прямою реалізацією дуальних чисел та їх узагальненням на багато змінних. Ceres використовує цей математичний апарат для forward-mode автодиференціювання, що дозволяє розраховувати значення якобіанів для складних задач нелінійної оптимізації за один прохід без значних втрат точності.</p>
+
+
+  <p>Також дуальні числа відіграють ключову роль у сучасному <a href="https://en.wikipedia.org/wiki/Differentiable_programming">диференційовному програмуванні</a>, зокрема у диференційовних симуляторах фізики (на кшталт <a href="https://github.com/google/brax">Brax</a>, <a href="https://mujoco.org/">MuJoCo</a> чи <a href="https://www.taichi-lang.org/">Taichi</a>). Це пов'язано з великою кількістю виходів по відношенню до входів (наприклад, невелика кількість керуючих параметрів перетворюється у тисячі координат частинок): типове зворотне поширення помилки (backpropagation) вимагає перезапуску на кожен вихід, тоді як пряме автодиференціювання &mdash; на кожен вхід. Відповідні інструменти зараз активно розвиваються: їх можна знайти у бібліотеці <a href="https://jax.readthedocs.io/">JAX</a> від Google, а також нещодавно з'явилась підтримка такого режиму і в PyTorch (<a href="https://pytorch.org/docs/stable/autograd.html#forward-mode-ad"><code>torch.autograd.forward_ad</code></a>).</p>
+
+
+  <p>Ну що ж, давайте розбиратися, як це працює.</p>
+
+
+  <h3>Поліноми</h3>
+
+  <p>Почнемо з улюблених функцій людства &mdash; поліномів; що буде, якщо у функцію \(f(z) = z^n\) підставити \(z = x + \varepsilon\), де \(\varepsilon^2 = 0\)?
+$$
+\begin{align*}
+f(x + \varepsilon) &= (x + \varepsilon)^n 
+= \sum_{k=0}^n \binom{n}{k} x^{n-k} \varepsilon^k =\\
+&= \binom{n}{0} x^n + \binom{n}{1} x^{n-1} \varepsilon + \underbrace{\binom{n}{2} x^{n-2} \varepsilon^2 + \dots + \varepsilon^n}_{=0}\\
+&= x^n + n x^{n-1} \varepsilon.
+\end{align*}
+$$
+Уважний читач може звернути увагу на схожість виразу при \(\varepsilon\) на похідну \(f'(x)\); та чи має це практичну цінність, чи це просто курйоз для однієї конкретної функції? Не важко бачити, що для довільного полінома також буде вірно</p>
+$$
+P(x + \varepsilon) = P(x) + P'(x) \varepsilon,
+$$
+оскільки поліном &mdash; це зважена сума степенів \(x\). Але маючи таке твердження для поліномів, ми вже вправі очікувати чогось подібного і для рядів Тейлора, тож як мінімум усі функції в області своєї аналітичності повинні володіти властивістю \(f(x + \varepsilon) = f(x) + f'(x) \varepsilon\), а цього вже більш ніж достатньо, щоб усе це стало цікавим з практичної точки зору &mdash; ми вже отримали право писати \(\sin(x + \varepsilon) = \sin(x) + \cos(x)\varepsilon\).</p>
+
+
+  <p>Насправді, написану формулу можна проштовхнути ще далі: достатньо, щоб функція була двічі диференційовна. Для любителів формул доведення під катом.</p>
+
+  <button onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">Показати доведення</button>
+  <div class="quote">
+    <p>За <a href="https://en.wikipedia.org/wiki/Fundamental_theorem_of_calculus">фундаментальною теоремою математичного аналізу</a> точний приріст гладкої функції можна записати
+$$
+f(x + h) = f(x) + h \int_0^1 f'(x + sh) ds.
+$$
+Якщо застосувати до цього інтеграла інтегрування частинами, ми строго виділимо лінійну частину і квадрат приросту
+$$
+f(x + h) = f(x) + h f'(x) + h^2 \int_0^1 (1 - s) f''(x + sh) ds.
+$$
+Розширюючи визначення нашої функції з поля \(\mathbb{R}\) на кільце дуальних чисел, ми формально підставляємо \(h = \varepsilon\) і отримуємо
+$$
+f(x + \varepsilon) = f(x) + f'(x)\varepsilon.
+$$</p>
+  </div>
+
+
+  <h3>Зв'язок з нескінченно малими (можна пропустити)</h3>
+
+  <button onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">Тут темно і страшно, якщо що</button>
+  <div class="quote">
+    <p>Введена нами система може здатися схожою на <a href="https://en.wikipedia.org/wiki/Non-standard_analysis">нестандартний аналіз</a>, коли дійсні числа розширюють до неархімедового поля \(R^*\), додаючи нескінченно малу \(\delta\). Проте, насправді вона ближча до <a href="https://en.wikipedia.org/wiki/Synthetic_differential_geometry">синтетичної диференціальної геометрії</a>: аналіз Робінсона працює в рамках класичної логіки першого порядку та породжує "чесне" поле, хай і неархімедове, тоді як синтетична диференціальна геометрія в рамках <a href="https://en.wikipedia.org/wiki/Intuitionistic_logic">інтуїціоністської логіки</a> відмовляється від закону виключеного третього і змінює саме поняття функції: усі внутрішні функції в ній автоматично є гладкими, а доведене нами твердження \(f(x + \varepsilon) = f(x) + f'(x)\varepsilon\) по суті стає базовою аксіомою (це є одне з формулювань <a href="https://ncatlab.org/nlab/show/Kock-Lawvere+axiom">аксіоми Кока-Ловіра</a>).</p>
+  </div>
+
+
+  <h2>Час забруднити руки</h2>
+
+  <p>Ні, вбивати ми нікого не будемо (принаймні поки що), просто пограємося з демо. Для початку давайте просто порівняємо три варіанти взяття похідної: аналітичний за допомогою бібліотеки math.js, звичну нам формулу
+$$
+f'(x) = \lim_{\delta \to 0} \frac{f(x+\delta) - f(x)}{\delta}
+$$
+та дуальні числа. Введіть якусь функцію в поле та спостерігайте за графіками, змінюйте значення \(\delta\), щоб спостерігати за зміною точності. Для великих значень параметру \(\delta\) скінченні різниці не зможуть зреагувати на високочастотні зміни функції, а для надто малих будуть проявлятися проблеми втрати точності. Дуальні ж числа пропонують нам безпараметричний підхід.</p>
+  <div class="demo demo-layout">
+    <div class="demo-controls">
+      <label>Функція \(f(x)\):</label>
+      <input type="text" id="demo1-func" value="sin(x^2)">
+      <small><a href="https://mathjs.org/docs/expressions/syntax.html" target="_blank">Як писати функції? (math.js syntax)</a></small>
+      <hr style="width: 100%; border: 0.5px solid #ccc;">
+      <div><strong>Аналітична похідна:</strong><br><span id="demo1-analytic-label">...</span></div>
+      <hr style="width: 100%; border: 0.5px solid #ccc;">
+      <label>Крок скінченних різниць \(\delta\): <span id="demo1-delta-val">10<sup>-2</sup></span></label>
+      <input type="range" id="demo1-delta" min="-15" max="0" step="0.1" value="-2">
+    </div>
+    <div class="demo-plot">
+      <div id="demo1-chart"></div>
+    </div>
+  </div>
+
+
+  <p>А тепер давайте нехай дуальні числа покажуть всю свою силу: зробимо те, чого не потягне аналітика. У наступному демо введіть якусь JS функцію, що повертає число. Не відмовляйте собі в конструкціях <code>for</code> та <code>if</code>.</p>
+  <div class="demo demo-layout">
+    <div class="demo-controls">
+      <label>Тіло функції <code>f(x)</code> на JS:</label>
+      <textarea id="demo2-code" rows="8" style="font-family: monospace; font-size: 13px; width: 100%; resize: vertical;">let y = x;
+for (let i = 0; i < 5; i++) {
+    y = sin(y) * cos(x);
+}
+return y;</textarea>
+      <button id="demo2-run">▶ Запустити</button>
+      <div id="demo2-error" style="color: red; font-size: 12px;"></div>
+    </div>
+    <div class="demo-plot">
+      <div id="demo2-chart"></div>
+    </div>
+  </div>
+
+
+  <h2>Невелика задачка</h2>
+
+  <p>Як щодо маленького челенджу? Програмісти ж люблять челеджі? Придумування нових чисел схоже на винайдення нових типів даних, то давайте напишемо такий тип даних. Заімплементуйте дуальні числа, а наступне демо містить кілька юніттестів для перевірки чотирьох арифметичних дій. <b>Підказка:</b> для ділення домножте чисельник і знаменник на спряжене до знаменника (рахується так само як для комплексних чисел: \((a+b\varepsilon)^* = a - b\varepsilon\)).</p>
+  <div class="demo demo-layout">
+    <div class="demo-controls" style="flex: 3;">
+      <label>Напишіть реалізацію <code>Dual</code>:</label>
+      <textarea id="demo3-code" rows="18" style="font-family: monospace; font-size: 13px; width: 100%; resize: vertical;">class Dual {
+  constructor(real, dual) {
+    this.real = real;
+    this.dual = dual;
+  }
+  
+  add(other) {
+    // Напишіть код тут
+    
+  }
+  
+  sub(other) {
+    // Напишіть код тут (для: this - other)
+    
+  }
+  
+  mul(other) {
+    // Напишіть код тут
+    
+  }
+  
+  div(other) {
+    // Напишіть код тут (для: this / other)
+    
+  }
+}</textarea>
+      <button id="demo3-run">▶ Запустити тести</button>
+    </div>
+    <div class="demo-plot" style="flex: 2; min-width: 300px;">
+      <strong>Результати тестів:</strong>
+      <div id="demo3-results" style="margin-top: 10px; font-family: monospace; font-size: 12px; background: #fff; padding: 10px; border: 1px solid #ccc; min-height: 250px;">
+        Очікування запуску...
+      </div>
+    </div>
+  </div>
+<b>Маленька задача навздогін:</b> ми понизили нашу алгебраїчну конструкцію від поля до кільця, тож там є проблеми з діленням &mdash; виясніть які саме. <b>Підказка:</b> скористайтесь результатами попередньої задачі, щоб вияснити на що крім нуля не можна ділити в кільці дуальних чисел.
+
+
+  <h2>Замість висновків</h2>
+
+<p>Подивіться, що ми з вами тут щойно навернули: придумали \(\varepsilon\) яке не нуль, але і трошки нуль, набудували на цьому якусь теорію, а вона ще й виявилася практично корисною... Хочеться закінчити словами Георга Кантора: <q>Das Wesen der Mathematik liegt in ihrer Freiheit &mdash; сутність математики полягає в її <a href="https://en.wikipedia.org/wiki/Freedom">свободі</a>.</q>
+</p>
+
+
+<script>
+// DEMO 1 Logic
+class Dual {
+  constructor(real, dual) {
+    this.real = real;
+    this.dual = dual;
+  }
+}
+
+function evaluateDualAST(node, x_val) {
+  if (node.isConstantNode) return new Dual(node.value, 0);
+  if (node.isSymbolNode) {
+    if (node.name === 'x') return x_val;
+    try {
+      return new Dual(math.evaluate(node.name), 0);
+    } catch (e) {
+      throw new Error('Unknown symbol: ' + node.name);
+    }
+  }
+  if (node.isOperatorNode) {
+    if (node.args.length === 1) {
+      let a = evaluateDualAST(node.args[0], x_val);
+      let scope = {a: a.real};
+      let exprStr = `${node.op}a`;
+      
+      let realVal = math.evaluate(exprStr, scope);
+      let derivA = math.derivative(exprStr, 'a').evaluate(scope);
+      return new Dual(realVal, derivA * a.dual);
+    } else {
+      let a = evaluateDualAST(node.args[0], x_val);
+      let b = evaluateDualAST(node.args[1], x_val);
+      let scope = {a: a.real, b: b.real};
+      let exprStr = `a ${node.op} b`;
+      
+      let realVal = math.evaluate(exprStr, scope);
+      let derivA = math.derivative(exprStr, 'a').evaluate(scope);
+      let derivB = math.derivative(exprStr, 'b').evaluate(scope);
+      
+      // Multivariate chain rule!
+      return new Dual(realVal, derivA * a.dual + derivB * b.dual);
+    }
+  }
+  if (node.isFunctionNode) {
+    let a = evaluateDualAST(node.args[0], x_val);
+    let fn = node.fn.name;
+    try {
+      // f(a.real)
+      let realVal = math.evaluate(`${fn}(${a.real})`);
+      // f'(a.real)
+      let derivVal = math.derivative(`${fn}(x)`, 'x').evaluate({x: a.real});
+      // Chain rule: f'(a.real) * a.dual
+      return new Dual(realVal, a.dual * derivVal);
+    } catch (e) {
+      throw new Error(`Cannot evaluate or differentiate function: ${fn}`);
+    }
+  }
+  if (node.isParenthesisNode) {
+    return evaluateDualAST(node.content, x_val);
+  }
+  throw new Error('Unsupported node type: ' + node.type);
+}
+
+let cached_xs = [];
+let cached_y_func = [];
+let cached_y_analytic = [];
+let cached_y_dual = [];
+let cached_expr = null;
+
+function updateFunc() {
+  const funcStr = document.getElementById('demo1-func').value;
+  
+  let expr, deriv;
+  try {
+    expr = math.parse(funcStr);
+    deriv = math.derivative(expr, 'x');
+    document.getElementById('demo1-analytic-label').innerText = "f'(x) = " + deriv.toString();
+  } catch (e) {
+    document.getElementById('demo1-analytic-label').innerText = "Помилка парсингу або непідтримувана функція!";
+    return;
+  }
+  
+  cached_expr = expr;
+  cached_xs = [];
+  cached_y_func = [];
+  cached_y_analytic = [];
+  cached_y_dual = [];
+  
+  for (let x = -3; x <= 3; x += 0.05) {
+    cached_xs.push(x);
+    try { cached_y_func.push(expr.evaluate({x: x})); } catch(e) { cached_y_func.push(null); }
+    try { cached_y_analytic.push(deriv.evaluate({x: x})); } catch(e) { cached_y_analytic.push(null); }
+    try {
+      const res = evaluateDualAST(expr, new Dual(x, 1));
+      cached_y_dual.push(res.dual);
+    } catch(e) { cached_y_dual.push(null); }
+  }
+  
+  if (window.MathJax) {
+    MathJax.typesetPromise([document.getElementById('demo1-analytic-label')]).catch(err => console.log(err));
+  }
+  
+  updateChart();
+}
+
+function updateChart() {
+  const deltaPower = parseFloat(document.getElementById('demo1-delta').value);
+  const delta = Math.pow(10, deltaPower);
+  
+  document.getElementById('demo1-delta-val').innerHTML = `10<sup>${deltaPower}</sup>`;
+  
+  const y_fd = [];
+  if (cached_expr) {
+    for (let i = 0; i < cached_xs.length; i++) {
+      let x = cached_xs[i];
+      try {
+        const f1 = cached_expr.evaluate({x: x + delta});
+        const f0 = cached_expr.evaluate({x: x});
+        y_fd.push((f1 - f0) / delta);
+      } catch(e) { y_fd.push(null); }
+    }
+  }
+  
+  const trace_func = { x: cached_xs, y: cached_y_func, mode: 'lines', name: 'f(x)', line: {color: 'black'} };
+  const trace_analytic = { x: cached_xs, y: cached_y_analytic, mode: 'lines', name: "Analytic f'(x)", line: {color: 'red', width: 4, dash: 'dash'} };
+  const trace_fd = { x: cached_xs, y: y_fd, mode: 'lines', name: 'Finite Diff', line: {color: 'orange', width: 2} };
+  const trace_dual = { x: cached_xs, y: cached_y_dual, mode: 'lines', name: 'Dual AutoDiff', line: {color: 'cyan', width: 2, dash: 'dot'} };
+  
+  const layout = {
+    margin: { l: 40, r: 10, b: 30, t: 30 },
+    legend: { x: 0.01, y: 0.99 },
+    plot_bgcolor: '#fff',
+    paper_bgcolor: '#eee',
+    height: 350
+  };
+  
+  Plotly.react('demo1-chart', [trace_func, trace_analytic, trace_fd, trace_dual], layout, {responsive: true});
+}
+
+document.getElementById('demo1-func').addEventListener('input', updateFunc);
+document.getElementById('demo1-delta').addEventListener('input', updateChart);
+window.addEventListener('load', updateFunc);
+
+// ============================================================
+// DEMO 2 Logic: Acorn-based JS interpreter with Dual numbers
+// ============================================================
+
+const RETURN_SIGNAL = Symbol('return');
+
+function toDual(v) {
+  return v instanceof Dual ? v : new Dual(Number(v), 0);
+}
+
+function dualBinOp(op, left, right) {
+  const a = toDual(left), b = toDual(right);
+  switch (op) {
+    case '+': return new Dual(a.real + b.real, a.dual + b.dual);
+    case '-': return new Dual(a.real - b.real, a.dual - b.dual);
+    case '*': return new Dual(a.real * b.real, a.real * b.dual + a.dual * b.real);
+    case '/': return new Dual(a.real / b.real, (a.dual * b.real - a.real * b.dual) / (b.real * b.real));
+    case '**': case '^': {
+      let r = Math.pow(a.real, b.real);
+      let d = r * (b.dual * Math.log(a.real) + b.real * a.dual / a.real);
+      if (a.real === 0 && b.real > 0) d = 0;
+      return new Dual(r, d);
+    }
+    case '%': return new Dual(a.real % b.real, a.dual); // approximate
+    default: throw new Error('Unknown binary op: ' + op);
+  }
+}
+
+function realVal(v) {
+  return v instanceof Dual ? v.real : Number(v);
+}
+
+function evalJS(node, scope) {
+  switch (node.type) {
+    case 'Program':
+    case 'BlockStatement': {
+      let result;
+      for (const stmt of node.body) {
+        result = evalJS(stmt, scope);
+        if (result && result[RETURN_SIGNAL]) return result;
+      }
+      return result;
+    }
+    case 'ExpressionStatement':
+      return evalJS(node.expression, scope);
+    case 'ReturnStatement':
+      return { [RETURN_SIGNAL]: true, value: evalJS(node.argument, scope) };
+    case 'Literal':
+      return node.value;
+    case 'Identifier':
+      if (!(node.name in scope)) throw new Error('Undefined variable: ' + node.name);
+      return scope[node.name];
+    case 'VariableDeclaration': {
+      for (const decl of node.declarations) {
+        scope[decl.id.name] = decl.init ? evalJS(decl.init, scope) : undefined;
+      }
+      return;
+    }
+    case 'AssignmentExpression': {
+      let val = evalJS(node.right, scope);
+      if (node.operator !== '=') {
+        let left = evalJS(node.left, scope);
+        val = dualBinOp(node.operator.slice(0, -1), left, val);
+      }
+      scope[node.left.name] = val;
+      return val;
+    }
+    case 'BinaryExpression': {
+      const left = evalJS(node.left, scope);
+      const right = evalJS(node.right, scope);
+      const op = node.operator;
+      // Comparison operators return plain booleans
+      if (['<', '>', '<=', '>=', '==', '===', '!=', '!=='].includes(op)) {
+        const a = realVal(left), b = realVal(right);
+        switch (op) {
+          case '<': return a < b;
+          case '>': return a > b;
+          case '<=': return a <= b;
+          case '>=': return a >= b;
+          case '==': case '===': return a === b;
+          case '!=': case '!==': return a !== b;
+        }
+      }
+      return dualBinOp(op, left, right);
+    }
+    case 'LogicalExpression': {
+      if (node.operator === '&&') return evalJS(node.left, scope) && evalJS(node.right, scope);
+      if (node.operator === '||') return evalJS(node.left, scope) || evalJS(node.right, scope);
+      throw new Error('Unknown logical op: ' + node.operator);
+    }
+    case 'UnaryExpression': {
+      const arg = evalJS(node.argument, scope);
+      if (node.operator === '-') { const a = toDual(arg); return new Dual(-a.real, -a.dual); }
+      if (node.operator === '+') return toDual(arg);
+      if (node.operator === '!') return !realVal(arg);
+      throw new Error('Unknown unary op: ' + node.operator);
+    }
+    case 'UpdateExpression': {
+      let val = evalJS(node.argument, scope);
+      let r = realVal(val);
+      let newVal = node.operator === '++' ? r + 1 : r - 1;
+      scope[node.argument.name] = newVal;
+      return node.prefix ? newVal : r;
+    }
+    case 'CallExpression': {
+      const fnName = node.callee.name;
+      const args = node.arguments.map(a => evalJS(a, scope));
+      if (fnName === 'Math' || (node.callee.type === 'MemberExpression' && node.callee.object.name === 'Math')) {
+        throw new Error('Use sin(x) instead of Math.sin(x)');
+      }
+      // Use math.js chain rule for any function, exactly like Demo 1
+      const a = toDual(args[0]);
+      try {
+        let rv = math.evaluate(`${fnName}(${a.real})`);
+        let dv = math.derivative(`${fnName}(t)`, 't').evaluate({t: a.real});
+        return new Dual(rv, a.dual * dv);
+      } catch (e) {
+        throw new Error(`Unknown function: ${fnName}`);
+      }
+    }
+    case 'MemberExpression': {
+      const obj = evalJS(node.object, scope);
+      const prop = node.computed ? evalJS(node.property, scope) : node.property.name;
+      if (obj instanceof Dual) {
+        if (prop === 'real') return obj.real;
+        if (prop === 'dual') return obj.dual;
+      }
+      return obj[prop];
+    }
+    case 'ConditionalExpression':
+    case 'IfStatement': {
+      const test = realVal(evalJS(node.test, scope));
+      if (test) {
+        return evalJS(node.consequent, scope);
+      } else if (node.alternate) {
+        return evalJS(node.alternate, scope);
+      }
+      return;
+    }
+    case 'ForStatement': {
+      if (node.init) evalJS(node.init, scope);
+      let iters1 = 0;
+      while (realVal(evalJS(node.test, scope))) {
+        if (++iters1 > 10000) throw new Error('Занадто багато ітерацій (захист від нескінченного циклу)');
+        let res = evalJS(node.body, scope);
+        if (res && res[RETURN_SIGNAL]) return res;
+        if (node.update) evalJS(node.update, scope);
+      }
+      return;
+    }
+    case 'WhileStatement': {
+      let iters2 = 0;
+      while (realVal(evalJS(node.test, scope))) {
+        if (++iters2 > 10000) throw new Error('Занадто багато ітерацій (захист від нескінченного циклу)');
+        let res = evalJS(node.body, scope);
+        if (res && res[RETURN_SIGNAL]) return res;
+      }
+      return;
+    }
+    default:
+      throw new Error('Unsupported JS construct: ' + node.type);
+  }
+}
+
+function runDemo2Code(code, xVal) {
+  // Wrap in a function body so 'return' works
+  const wrapped = `{ ${code} }`;
+  const ast = acorn.parse(wrapped, { ecmaVersion: 2020, sourceType: 'script', allowReturnOutsideFunction: true });
+  const scope = { x: new Dual(xVal, 1) };
+  const result = evalJS(ast, scope);
+  if (result && result[RETURN_SIGNAL]) return toDual(result.value);
+  throw new Error('Function must end with a return statement');
+}
+
+function updateDemo2() {
+  const code = document.getElementById('demo2-code').value;
+  const errDiv = document.getElementById('demo2-error');
+  errDiv.textContent = '';
+  
+  const xs = [], y_func = [], y_dual = [];
+  
+  try {
+    for (let x = -3; x <= 3; x += 0.05) {
+      xs.push(x);
+      const res = runDemo2Code(code, x);
+      y_func.push(res.real);
+      y_dual.push(res.dual);
+    }
+  } catch (e) {
+    errDiv.textContent = e.message;
+    return;
+  }
+  
+  const traces = [
+    { x: xs, y: y_func, mode: 'lines', name: 'f(x)', line: {color: 'black'} },
+    { x: xs, y: y_dual, mode: 'lines', name: "Dual f'(x)", line: {color: 'cyan', width: 2, dash: 'dot'} }
+  ];
+  const layout = {
+    margin: { l: 40, r: 10, b: 30, t: 30 },
+    legend: { x: 0.01, y: 0.99 },
+    plot_bgcolor: '#fff',
+    paper_bgcolor: '#eee',
+    height: 350
+  };
+  Plotly.react('demo2-chart', traces, layout, {responsive: true});
+}
+
+document.getElementById('demo2-run').addEventListener('click', updateDemo2);
+
+// ============================================================
+// DEMO 3 Logic: Unit Testing Challenge
+// ============================================================
+
+function runDemo3Tests() {
+  const code = document.getElementById('demo3-code').value;
+  const resultsDiv = document.getElementById('demo3-results');
+  resultsDiv.innerHTML = '';
+  
+  let UserDual;
+  try {
+    UserDual = new Function(`return (${code});`)();
+    if (!UserDual || typeof UserDual !== 'function') {
+      throw new Error('Код має повертати клас Dual');
+    }
+  } catch (e) {
+    resultsDiv.innerHTML = `<div style="color: red;">Помилка компіляції:<br>${e.message}</div>`;
+    return;
+  }
+  
+  const tests = [
+    { name: 'add()', op: 'add', a: [1, 2], b: [3, 4], expected: [4, 6] },
+    { name: 'sub()', op: 'sub', a: [5, 6], b: [2, 1], expected: [3, 5] },
+    { name: 'mul()', op: 'mul', a: [2, 3], b: [4, 5], expected: [8, 22] },
+    { name: 'div()', op: 'div', a: [4, 6], b: [2, 1], expected: [2, 2] }
+  ];
+  
+  let allPassed = true;
+  
+  tests.forEach(t => {
+    let outputHTML = `<div><strong>Тест ${t.name}</strong>: `;
+    try {
+      const a = new UserDual(t.a[0], t.a[1]);
+      const b = new UserDual(t.b[0], t.b[1]);
+      
+      if (typeof a[t.op] !== 'function') {
+        throw new Error(`Метод ${t.op} не знайдено`);
+      }
+      
+      const res = a[t.op](b);
+      
+      if (!res || res.real === undefined || res.dual === undefined) {
+         throw new Error(`Метод має повертати об'єкт Dual з властивостями real та dual`);
+      }
+      
+      const resReal = Math.round(res.real * 100000) / 100000;
+      const resDual = Math.round(res.dual * 100000) / 100000;
+      
+      const passed = (resReal === t.expected[0]) && (resDual === t.expected[1]);
+      
+      if (passed) {
+        outputHTML += `<span style="color: green;">✅ Пройдено</span></div>`;
+      } else {
+        function fD(r, d) {
+          if (isNaN(r) || isNaN(d)) return `NaN`;
+          if (d === 0) return `${r}`;
+          let ds = Math.abs(d) === 1 ? '\\varepsilon' : `${Math.abs(d)}\\varepsilon`;
+          if (r === 0) return (d < 0 ? '-' : '') + ds;
+          return `${r} ${d < 0 ? '-' : '+'} ${ds}`;
+        }
+        let aS = fD(t.a[0], t.a[1]);
+        let bS = fD(t.b[0], t.b[1]);
+        let eS = fD(t.expected[0], t.expected[1]);
+        let rS = fD(resReal, resDual);
+        
+        let eq = '';
+        if (t.op === 'div') {
+          eq = `\\frac{${aS}}{${bS}} = ${eS}`;
+        } else {
+          let opSign = t.op === 'add' ? '+' : (t.op === 'sub' ? '-' : '\\cdot');
+          eq = `(${aS}) ${opSign} (${bS}) = ${eS}`;
+        }
+        
+        outputHTML += `<span style="color: red;">❌ Не пройдено</span></div>`;
+        outputHTML += `<div style="color: #666; margin-left: 10px; margin-top: 5px;">Очікувано: \\( ${eq} \\)<br>Ваш результат: \\( ${rS} \\)</div>`;
+        allPassed = false;
+      }
+    } catch (e) {
+      outputHTML += `<span style="color: red;">❌ Помилка</span></div>`;
+      outputHTML += `<div style="color: #666; margin-left: 10px;">${e.message}</div>`;
+      allPassed = false;
+    }
+    resultsDiv.innerHTML += outputHTML + '<br>';
+  });
+  
+  if (allPassed) {
+    resultsDiv.innerHTML += `<div style="color: green; font-weight: bold; margin-top: 10px;">🎉 Всі тести пройдено успішно!</div>`;
+  }
+}
+
+document.getElementById('demo3-run').addEventListener('click', runDemo3Tests);
+</script>
+</body>
+</html>
