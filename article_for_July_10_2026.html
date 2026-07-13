@@ -86,7 +86,7 @@
   <p>Як бачимо, тут є багато цікавого, але я хотів би особливо виділити механізм розрахунку значень похідних, заснований на дуальних числах. Ця схема використовується у бібліотеці Ceres та всьому, що надбудовано на ній, &mdash; <a href="http://ceres-solver.org/automatic_derivatives.html#dual-numbers-jets"> структура "Jet"</a> є прямою реалізацією дуальних чисел та їх узагальненням на багато змінних. Ceres використовує цей математичний апарат для forward-mode автодиференціювання, що дозволяє розраховувати значення якобіанів для складних задач нелінійної оптимізації за один прохід без значних втрат точності.</p>
 
 
-  <p>Також дуальні числа відіграють ключову роль у сучасному <a href="https://en.wikipedia.org/wiki/Differentiable_programming">диференційовному програмуванні</a>, зокрема у диференційовних симуляторах фізики (на кшталт <a href="https://github.com/google/brax">Brax</a>, <a href="https://mujoco.org/">MuJoCo</a> чи <a href="https://www.taichi-lang.org/">Taichi</a>). Це пов'язано з великою кількістю виходів по відношенню до входів (наприклад, невелика кількість керуючих параметрів перетворюється у тисячі координат частинок): типове зворотне поширення помилки (backpropagation) вимагає перезапуску на кожен вихід, тоді як пряме автодиференціювання &mdash; на кожен вхід. Відповідні інструменти зараз активно розвиваються: їх можна знайти у бібліотеці <a href="https://jax.readthedocs.io/">JAX</a> від Google, а також нещодавно з'явилась підтримка такого режиму і в PyTorch (<a href="https://pytorch.org/docs/stable/autograd.html#forward-mode-ad"><code>torch.autograd.forward_ad</code></a>).</p>
+  <p>Також дуальні числа відіграють ключову роль у сучасному <a href="https://en.wikipedia.org/wiki/Differentiable_programming">диференційовному програмуванні</a>, зокрема у диференційовних симуляторах фізики (на кшталт <a href="https://github.com/google/brax">Brax</a>, <a href="https://mujoco.org/">MuJoCo</a> чи <a href="https://www.taichi-lang.org/">Taichi</a>). Це пов'язано з необхідністю обчислювати похідні для великої кількості виходів відносно малої кількості входів (наприклад, невелика кількість керуючих параметрів перетворюється у тисячі координат частинок): типове зворотне поширення помилки (backpropagation) вимагатиме перезапуску на кожен вихід, тоді як пряме автодиференціювання &mdash; на кожен вхід. Відповідні інструменти зараз активно розвиваються: їх можна знайти у бібліотеці <a href="https://jax.readthedocs.io/">JAX</a> від Google, а також нещодавно з'явилась підтримка такого режиму і в PyTorch (<a href="https://pytorch.org/docs/stable/autograd.html#forward-mode-ad"><code>torch.autograd.forward_ad</code></a>).</p>
 
 
   <p>Ну що ж, давайте розбиратися, як це працює.</p>
@@ -667,6 +667,9 @@ function runDemo3Tests() {
   
   if (allPassed) {
     resultsDiv.innerHTML += `<div style="color: green; font-weight: bold; margin-top: 10px;">🎉 Всі тести пройдено успішно!</div>`;
+  }
+  if (window.MathJax) {
+    MathJax.typesetPromise([resultsDiv]).catch(err => console.error(err));
   }
 }
 
