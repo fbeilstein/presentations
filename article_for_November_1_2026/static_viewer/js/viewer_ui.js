@@ -151,7 +151,9 @@ export class ViewerUI {
     if (pes) pes.style.display = 'none';
     const dock = document.getElementById('bottom-dock');
     if (dock) dock.style.display = 'none';
-    this.orbitalsPanel.renderGroups(molBundle.categories, molBundle.hasEsp);
+    this.orbitalsPanel.clear();
+    const hasEsp = !!(molBundle.hasEsp ?? (molBundle.espMeshes && Object.keys(molBundle.espMeshes).length > 0));
+    this.orbitalsPanel.renderGroups(molBundle.categories, hasEsp);
     if (this.app.viewer3d) {
       setTimeout(() => this.app.viewer3d.resize(), 50);
     }
@@ -169,7 +171,8 @@ export class ViewerUI {
       categories = ViewerOrbitalsPanel.parseRawOrbitalKeys(Object.keys(bundle.orbitalMeshes));
     }
 
-    const hasEsp = true;
+    this.orbitalsPanel.clear();
+    const hasEsp = !!(bundle.hasEsp || (bundle.espMeshes && Object.keys(bundle.espMeshes).length > 0));
 
     this.orbitalsPanel.renderGroups(categories, hasEsp);
   }

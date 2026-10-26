@@ -152,6 +152,8 @@ export async function loadReactionBundle(source, onProgress) {
     }
   }
 
+  bundle.hasEsp = bundle.hasEsp ?? (bundle.espMeshes && Object.keys(bundle.espMeshes).length > 0);
+
   if (!bundle.trajectory) {
     throw new Error('Archive does not contain a valid multistep_pathway.json or molecule structure.');
   }
@@ -287,7 +289,7 @@ export function buildMoleculeBundle(molIdentifier, parentBundle) {
     orbitalMeshes,
     espMeshes,
     categories,
-    hasEsp: true,
+    hasEsp: Object.keys(espMeshes).length > 0,
     isSingleMolecule: true
   };
 }

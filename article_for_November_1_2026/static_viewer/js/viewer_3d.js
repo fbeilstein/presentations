@@ -221,6 +221,10 @@ export class Viewer3D {
   setBundle(bundle) {
     this.bundle = bundle;
     this.currentFrameIdx = 0;
+    this.activeOrbitals.clear();
+    this.activeEsp = false;
+    this.showCharges = false;
+    this.updateColorbar(false);
     if (this.glViewer) {
       this.glViewer.clear();
       this.renderFrame(0, true);

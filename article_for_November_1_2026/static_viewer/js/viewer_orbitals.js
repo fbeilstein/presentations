@@ -26,7 +26,7 @@ export class ViewerOrbitalsPanel {
   /**
    * Render grouped categories from molecule JSON or reaction pathway tracks
    */
-  renderGroups(categories, hasEsp = true) {
+  renderGroups(categories, hasEsp = false) {
     this.container.innerHTML = '';
     if (!categories || categories.length === 0) {
       this.container.innerHTML = '<span class="empty-hint">No orbitals available</span>';
@@ -97,31 +97,30 @@ export class ViewerOrbitalsPanel {
     });
 
     // 2. Render ESP & Charges section
-    const showSurfacesSection = hasEsp || true;
-    if (showSurfacesSection) {
-      const espGroup = document.createElement('div');
-      espGroup.className = 'orbital-group esp-group';
-      const isEspCollapsed = this.collapsedGroups.has('Surfaces & Charges');
+    const groupTitle = hasEsp ? 'Surfaces & Charges' : 'Atom Charges';
+    const espGroup = document.createElement('div');
+    espGroup.className = 'orbital-group esp-group';
+    const isEspCollapsed = this.collapsedGroups.has(groupTitle);
 
-      const espHeader = document.createElement('div');
-      espHeader.className = 'orbital-group-header';
-      espHeader.innerHTML = `
-        <span class="group-title">Surfaces & Charges</span>
-        <span class="group-chevron">${isEspCollapsed ? '▸' : '▾'}</span>
-      `;
-      espHeader.addEventListener('click', () => {
-        if (this.collapsedGroups.has('Surfaces & Charges')) {
-          this.collapsedGroups.delete('Surfaces & Charges');
-        } else {
-          this.collapsedGroups.add('Surfaces & Charges');
-        }
-        this.renderGroups(categories, hasEsp);
-      });
-      espGroup.appendChild(espHeader);
+    const espHeader = document.createElement('div');
+    espHeader.className = 'orbital-group-header';
+    espHeader.innerHTML = `
+      <span class="group-title">${groupTitle}</span>
+      <span class="group-chevron">${isEspCollapsed ? '▸' : '▾'}</span>
+    `;
+    espHeader.addEventListener('click', () => {
+      if (this.collapsedGroups.has(groupTitle)) {
+        this.collapsedGroups.delete(groupTitle);
+      } else {
+        this.collapsedGroups.add(groupTitle);
+      }
+      this.renderGroups(categories, hasEsp);
+    });
+    espGroup.appendChild(espHeader);
 
-      const espBody = document.createElement('div');
-      espBody.className = 'orbital-group-body';
-      if (isEspCollapsed) espBody.style.display = 'none';
+    const espBody = document.createElement('div');
+    espBody.className = 'orbital-group-body';
+    if (isEspCollapsed) espBody.style.display = 'none';
 
       if (hasEsp) {
         const espRow = document.createElement('label');
@@ -178,7 +177,6 @@ export class ViewerOrbitalsPanel {
 
       espGroup.appendChild(espBody);
       this.container.appendChild(espGroup);
-    }
   }
 
   /**

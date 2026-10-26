@@ -156,6 +156,7 @@
         bundle.molKey = molBundle.molKey;
       }
     }
+    bundle.hasEsp = bundle.hasEsp ?? (bundle.espMeshes && Object.keys(bundle.espMeshes).length > 0);
     if (!bundle.trajectory) {
       throw new Error("Archive does not contain a valid multistep_pathway.json or molecule structure.");
     }
@@ -272,7 +273,7 @@
       orbitalMeshes,
       espMeshes,
       categories,
-      hasEsp: true,
+      hasEsp: Object.keys(espMeshes).length > 0,
       isSingleMolecule: true
     };
   }
@@ -480,6 +481,10 @@
     setBundle(bundle) {
       this.bundle = bundle;
       this.currentFrameIdx = 0;
+      this.activeOrbitals.clear();
+      this.activeEsp = false;
+      this.showCharges = false;
+      this.updateColorbar(false);
       if (this.glViewer) {
         this.glViewer.clear();
         this.renderFrame(0, true);
@@ -845,7 +850,7 @@ ${String(natoms).padStart(3, " ")}${String(bonds.length).padStart(3, " ")}  0  0
     /**
      * Render grouped categories from molecule JSON or reaction pathway tracks
      */
-    renderGroups(categories, hasEsp = true) {
+    renderGroups(categories, hasEsp = false) {
       this.container.innerHTML = "";
       if (!categories || categories.length === 0) {
         this.container.innerHTML = '<span class="empty-hint">No orbitals available</span>';
@@ -904,74 +909,72 @@ ${String(natoms).padStart(3, " ")}${String(bonds.length).padStart(3, " ")}  0  0
         groupEl.appendChild(body);
         this.container.appendChild(groupEl);
       });
-      const showSurfacesSection = hasEsp || true;
-      if (showSurfacesSection) {
-        const espGroup = document.createElement("div");
-        espGroup.className = "orbital-group esp-group";
-        const isEspCollapsed = this.collapsedGroups.has("Surfaces & Charges");
-        const espHeader = document.createElement("div");
-        espHeader.className = "orbital-group-header";
-        espHeader.innerHTML = `
-        <span class="group-title">Surfaces & Charges</span>
-        <span class="group-chevron">${isEspCollapsed ? "\u25B8" : "\u25BE"}</span>
-      `;
-        espHeader.addEventListener("click", () => {
-          if (this.collapsedGroups.has("Surfaces & Charges")) {
-            this.collapsedGroups.delete("Surfaces & Charges");
-          } else {
-            this.collapsedGroups.add("Surfaces & Charges");
-          }
-          this.renderGroups(categories, hasEsp);
-        });
-        espGroup.appendChild(espHeader);
-        const espBody = document.createElement("div");
-        espBody.className = "orbital-group-body";
-        if (isEspCollapsed) espBody.style.display = "none";
-        if (hasEsp) {
-          const espRow = document.createElement("label");
-          espRow.className = "orbital-item-row";
-          const espChk = document.createElement("input");
-          espChk.type = "checkbox";
-          espChk.className = "orb-chk";
-          espChk.checked = this.isEspActive;
-          espChk.addEventListener("change", (e) => {
-            this.isEspActive = e.target.checked;
-            this.onEspToggle(this.isEspActive);
-          });
-          const espDot = document.createElement("span");
-          espDot.className = "orb-dot";
-          espDot.style.backgroundColor = "#06b6d4";
-          const espText = document.createElement("span");
-          espText.className = "orb-label-text";
-          espText.textContent = "\u26A1 ESP Surface";
-          espRow.appendChild(espChk);
-          espRow.appendChild(espDot);
-          espRow.appendChild(espText);
-          espBody.appendChild(espRow);
+      const groupTitle = hasEsp ? "Surfaces & Charges" : "Atom Charges";
+      const espGroup = document.createElement("div");
+      espGroup.className = "orbital-group esp-group";
+      const isEspCollapsed = this.collapsedGroups.has(groupTitle);
+      const espHeader = document.createElement("div");
+      espHeader.className = "orbital-group-header";
+      espHeader.innerHTML = `
+      <span class="group-title">${groupTitle}</span>
+      <span class="group-chevron">${isEspCollapsed ? "\u25B8" : "\u25BE"}</span>
+    `;
+      espHeader.addEventListener("click", () => {
+        if (this.collapsedGroups.has(groupTitle)) {
+          this.collapsedGroups.delete(groupTitle);
+        } else {
+          this.collapsedGroups.add(groupTitle);
         }
-        const chargesRow = document.createElement("label");
-        chargesRow.className = "orbital-item-row";
-        const chargesChk = document.createElement("input");
-        chargesChk.type = "checkbox";
-        chargesChk.className = "orb-chk";
-        chargesChk.checked = this.isChargesActive;
-        chargesChk.addEventListener("change", (e) => {
-          this.isChargesActive = e.target.checked;
-          this.onChargesToggle(this.isChargesActive);
+        this.renderGroups(categories, hasEsp);
+      });
+      espGroup.appendChild(espHeader);
+      const espBody = document.createElement("div");
+      espBody.className = "orbital-group-body";
+      if (isEspCollapsed) espBody.style.display = "none";
+      if (hasEsp) {
+        const espRow = document.createElement("label");
+        espRow.className = "orbital-item-row";
+        const espChk = document.createElement("input");
+        espChk.type = "checkbox";
+        espChk.className = "orb-chk";
+        espChk.checked = this.isEspActive;
+        espChk.addEventListener("change", (e) => {
+          this.isEspActive = e.target.checked;
+          this.onEspToggle(this.isEspActive);
         });
-        const chargesDot = document.createElement("span");
-        chargesDot.className = "orb-dot";
-        chargesDot.style.backgroundColor = "#a855f7";
-        const chargesText = document.createElement("span");
-        chargesText.className = "orb-label-text";
-        chargesText.textContent = "\u{1F3F7} Atom Charges";
-        chargesRow.appendChild(chargesChk);
-        chargesRow.appendChild(chargesDot);
-        chargesRow.appendChild(chargesText);
-        espBody.appendChild(chargesRow);
-        espGroup.appendChild(espBody);
-        this.container.appendChild(espGroup);
+        const espDot = document.createElement("span");
+        espDot.className = "orb-dot";
+        espDot.style.backgroundColor = "#06b6d4";
+        const espText = document.createElement("span");
+        espText.className = "orb-label-text";
+        espText.textContent = "\u26A1 ESP Surface";
+        espRow.appendChild(espChk);
+        espRow.appendChild(espDot);
+        espRow.appendChild(espText);
+        espBody.appendChild(espRow);
       }
+      const chargesRow = document.createElement("label");
+      chargesRow.className = "orbital-item-row";
+      const chargesChk = document.createElement("input");
+      chargesChk.type = "checkbox";
+      chargesChk.className = "orb-chk";
+      chargesChk.checked = this.isChargesActive;
+      chargesChk.addEventListener("change", (e) => {
+        this.isChargesActive = e.target.checked;
+        this.onChargesToggle(this.isChargesActive);
+      });
+      const chargesDot = document.createElement("span");
+      chargesDot.className = "orb-dot";
+      chargesDot.style.backgroundColor = "#a855f7";
+      const chargesText = document.createElement("span");
+      chargesText.className = "orb-label-text";
+      chargesText.textContent = "\u{1F3F7} Atom Charges";
+      chargesRow.appendChild(chargesChk);
+      chargesRow.appendChild(chargesDot);
+      chargesRow.appendChild(chargesText);
+      espBody.appendChild(chargesRow);
+      espGroup.appendChild(espBody);
+      this.container.appendChild(espGroup);
     }
     /**
      * Helper to format reaction pathway tracks into Molecular Explorer style categories
@@ -1386,7 +1389,9 @@ ${String(natoms).padStart(3, " ")}${String(bonds.length).padStart(3, " ")}  0  0
       if (pes) pes.style.display = "none";
       const dock = document.getElementById("bottom-dock");
       if (dock) dock.style.display = "none";
-      this.orbitalsPanel.renderGroups(molBundle.categories, molBundle.hasEsp);
+      this.orbitalsPanel.clear();
+      const hasEsp = !!(molBundle.hasEsp ?? (molBundle.espMeshes && Object.keys(molBundle.espMeshes).length > 0));
+      this.orbitalsPanel.renderGroups(molBundle.categories, hasEsp);
       if (this.app.viewer3d) {
         setTimeout(() => this.app.viewer3d.resize(), 50);
       }
@@ -1400,7 +1405,8 @@ ${String(natoms).padStart(3, " ")}${String(bonds.length).padStart(3, " ")}  0  0
       } else if (bundle.orbitalMeshes && Object.keys(bundle.orbitalMeshes).length > 0) {
         categories = ViewerOrbitalsPanel.parseRawOrbitalKeys(Object.keys(bundle.orbitalMeshes));
       }
-      const hasEsp = true;
+      this.orbitalsPanel.clear();
+      const hasEsp = !!(bundle.hasEsp || bundle.espMeshes && Object.keys(bundle.espMeshes).length > 0);
       this.orbitalsPanel.renderGroups(categories, hasEsp);
     }
     updateFrameDisplay(frameIdx, totalFrames, energy) {
