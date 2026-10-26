@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reaction Pathway Player</title>
+  <link rel="stylesheet" href="static_viewer/css/viewer.css">
+  <script src="static_viewer/libs/jszip.min.js"></script>
+  <script src="static_viewer/libs/3Dmol-min.js"></script>
+</head>
+<body>
+  <div id="app-container">
+    <!-- Top Header: Title, Bundle Selector, Reaction Stats & Mechanism SVG -->
+    <header id="top-header">
+      <div class="header-meta">
+        <div class="header-title-row">
+          <select id="sel-bundle-switcher" class="bundle-select" style="display:none;"></select>
+          <h1 class="reaction-title" id="reaction-title">Loading Reaction...</h1>
+          <button class="btn btn-primary" id="btn-header-download" style="display:none; margin-left:12px; padding:3px 10px; font-size:11px; height:24px; align-items:center; gap:4px; font-weight:600; border-radius:4px;" title="Repack and download bundle">📥 Download</button>
+        </div>
+        <div class="reaction-stats">
+          <span>Barrier: <strong id="stat-barrier">—</strong></span>
+          <span>Solvent: <strong id="stat-solvent">—</strong></span>
+        </div>
+      </div>
+      <div id="mechanism-strip"></div>
+    </header>
+
+    <!-- Main Viewport: 3D Mol WebGL Canvas & Background PES Energy Plot -->
+    <main id="viewport-container">
+      <div id="gl-canvas-container"></div>
+      <div id="pes-canvas-container">
+        <canvas id="pes-canvas"></canvas>
+      </div>
+
+      <!-- ESP Colorbar Overlay (Hidden by default) -->
+      <div id="esp-colorbar" class="esp-colorbar" style="display: none;">
+        <div class="colorbar-header">Electrostatic Potential (kcal/mol)</div>
+        <div id="esp-colorbar-gradient" class="colorbar-gradient"></div>
+        <div class="colorbar-labels">
+          <span id="esp-colorbar-min">-30.0</span>
+          <span id="esp-colorbar-mid">0</span>
+          <span id="esp-colorbar-max">+30.0</span>
+        </div>
+      </div>
+
+      <!-- Top-right Orbitals Drawer Toggle Button -->
+      <div class="viewport-overlay-controls">
+        <button class="btn btn-panel-toggle" id="btn-toggle-orbitals">Orbitals ▾</button>
+      </div>
+
+      <!-- Side Panel: Molecular Explorer Grouped Orbitals & ESP Controls -->
+      <aside id="side-panel">
+        <div class="panel-header">
+          <span>Orbitals & Surfaces</span>
+        </div>
+        <div class="panel-body">
+          <div class="orbitals-list-container" id="orbitals-list">
+            <span style="color:var(--text-secondary);font-size:11px;">Loading orbitals...</span>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Bottom Dock: Static Playback Controls -->
+    <footer id="bottom-dock">
+      <div class="playback-buttons">
+        <button class="btn" id="btn-first" title="First Frame">|◀</button>
+        <button class="btn" id="btn-prev" title="Previous Frame">◀</button>
+        <button class="btn btn-play-fwd" id="btn-play-fwd" title="Play Forward">▶ Play Fwd</button>
+        <button class="btn btn-play-rev" id="btn-play-rev" title="Play Reverse">◀ Play Rev</button>
+        <button class="btn" id="btn-next" title="Next Frame">▶</button>
+        <button class="btn" id="btn-last" title="Last Frame">▶|</button>
+      </div>
+
+      <div class="slider-container">
+        <input type="range" id="frame-slider" min="0" max="0" value="0">
+        <div class="frame-info" id="frame-info">Frame <strong>0</strong> / 0</div>
+      </div>
+
+      <div class="dock-actions">
+        <select class="btn" id="select-speed" title="Playback Speed">
+          <option value="0.5">0.5x</option>
+          <option value="1.0" selected>1.0x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2.0">2.0x</option>
+        </select>
+      </div>
+    </footer>
+
+    <!-- Dropzone / Progress Overlay -->
+    <div id="overlay">
+      <div class="overlay-box" id="drop-box">
+        <h2 class="overlay-title">Reaction Pathway Player</h2>
+        <p class="overlay-desc" id="overlay-status">Drag & drop a .rxnbundle.zip here, or click to choose a file</p>
+        <input type="file" id="file-input" accept=".zip,.rxnbundle" style="display:none;">
+        <button class="btn btn-primary" id="btn-browse">Browse File...</button>
+        <div class="progress-bar-container" id="progress-bar-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download Modal -->
+    <div id="download-modal" class="modal-backdrop" style="display:none;">
+      <div class="download-modal-dialog">
+        <div class="download-modal-header">
+          <h3 id="download-modal-title">📦 Download Bundle</h3>
+          <button class="btn-modal-close" id="btn-close-download">&times;</button>
+        </div>
+        <div class="download-modal-body" id="download-modal-body"></div>
+        <div class="download-modal-footer">
+          <button class="btn" id="btn-cancel-download">Cancel</button>
+          <button class="btn btn-primary" id="btn-confirm-download">📦 Download</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="static_viewer/js/viewer_bundle.js"></script>
+</body>
+</html>
