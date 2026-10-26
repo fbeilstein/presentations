@@ -69,7 +69,7 @@ export class ViewerDownloadModal {
 
     let html = `
       <div style="color:var(--text-secondary); margin-bottom: 6px;">
-        Select the orbitals to include in the exported archive:
+        Select the orbitals and surfaces to include in the exported archive:
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; padding: 4px 6px; background: rgba(255,255,255,0.03); border-radius: 4px; margin-bottom: 8px;">
         <label style="font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">
@@ -81,13 +81,14 @@ export class ViewerDownloadModal {
       <div class="download-checklist" id="dl-orbital-checklist">
     `;
 
-    // 1. ESP Surface if present
+    // 1. ESP Surface section
     if (bundle.hasEsp) {
       html += `
+        <div style="font-weight:700; color:#cbd5e1; margin-top:4px; margin-bottom:2px; padding-left:4px; font-size:11px; border-bottom:1px solid rgba(255,255,255,0.1);">Surfaces & Electrostatics</div>
         <label class="download-check-item">
           <input type="checkbox" class="dl-orb-chk" value="esp" checked>
           <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#06b6d4;"></span>
-          <span style="font-weight:600;">⚡ ESP Surface</span>
+          <span style="font-weight:600;">⚡ Electrostatic Potential (ESP) Surface</span>
         </label>
       `;
     }
@@ -236,8 +237,12 @@ export class ViewerDownloadModal {
             };
             if (obj.orbitals) obj.orbitals = filterCats(obj.orbitals);
             if (obj.molecules && Array.isArray(obj.molecules)) {
-              obj.molecules.forEach(m => { if (m.orbitals) m.orbitals = filterCats(m.orbitals); });
+              obj.molecules.forEach(m => {
+                if (m.orbitals) m.orbitals = filterCats(m.orbitals);
+                if (!keepEsp) delete m.esp_surface;
+              });
             }
+            if (!keepEsp) delete obj.esp_surface;
             newZip.file(fname, JSON.stringify(obj, null, 2));
             continue;
           } catch (_) {}
