@@ -205,7 +205,7 @@
     Для подвійного зв'язку $\ce{C=O}$ або $\ce{C=C}$ він згортає їх у два еквівалентні вигнуті "бананові зв'язки" (banana bonds). 
     Математично хвильова функція та сама, але хімікам я таке показувати не буду.</li>
     <li><strong>Pipek-Mezey (1989):</strong> створений якраз для того, щоб запобігти утворенню бананових зв'язків. 
-    Pipek-Mezey максимізує заселеність за Маллікеном $\sum_A (q_A^i)^2$, 
+    Pipek-Mezey максимізує заселеність за Маллікеном, 
     тому в плоских системах він строго зберігає розділення $\sigma$- та $\pi$-зв'язків. 
     Проте він сильно залежить від базису та може збоїти на гетероатомах, тож я його теж відкинув.</li>
     <li><strong>Knizia IBO (2013):</strong> використовує концепцію Intrinsic Atomic Orbitals (IAO) як проміжний проектор. 
@@ -295,8 +295,16 @@
 
   <!-- Бензол -->
   <div class="demo">
-    <iframe id="viewer-iframe-benzene" src="https://fbeilstein.github.io/molecular_workbench/viewer.html?bundle=bundles/molecules/benzene.zip" height="480"></iframe>
+    <img src="https://fbeilstein.github.io/presentations/article_for_November_1_2026/images/benzene_orbitals.png" />
+    <iframe class="demo-iframe" src="https://fbeilstein.github.io/presentations/article_for_November_1_2026/viewer.html?bundle=bundles/benzene.zip" height="540"></iframe>
+    <div class="demo-caption">
+    Бензол.
+    Перша ароматична молекула, з якою зіштовхуються у курсі хімії.
+    На цьому демо показано всі орбіталі разом з антизв'язуючими.
+    Зображення адаптовано з Clayden J., Greeves N., Warren S., Organic chemistry і показує ароматичну $\pi$ підсистему.
+    </div>
   </div>
+
 
   <p>При виявленні таких орбіталей вони вилучаються з пулу локалізації, тоді як решта передається на IBO. Для симетричних систем (як бензол, де $\pi_2$ і $\pi_3$ мають однакову енергію і мінімізація може повернути їх під довільним кутом) ми додатково діагоналізуємо оператор заселеності атомів (<code>_snap_degenerate_pairs</code>), щоб повернути орбіталі вздовж осей зв'язків для красивої демонстрації.</p>
 
